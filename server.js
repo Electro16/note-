@@ -1,23 +1,47 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const cors = require('cors');
 
 const app = express();
-app.use(express.json());
-app.use(cors());
 
-mongoose.connect('mongodb://localhost:27017/notes', {
+// Middleware
+app.use(express.json());
+
+// Connect to MongoDB Atlas
+mongoose.connect('mongodb+srv://yash:<password>@note69.jsbkedx.mongodb.net/', {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
 
-const NoteSchema = new mongoose.Schema({
+// Define schema and model for notes
+const noteSchema = new mongoose.Schema({
   title: String,
   content: String,
 });
 
-const Note = mongoose.model('Note', NoteSchema);
+const Note = mongoose.model('Note', noteSchema);
 
+// Routes
+// Define routes for CRUD operations
+
+// Start the server
+const PORT = process.env.PORT || 3001;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+
+
+// Create a note
+app.post('/notes', async (req, res) => {
+  try {
+    const { title, content } = req.body;
+    const note = new Note({ title, content });
+    await note.save();
+    res.status(201).json(note);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+});
+
+// Get all notes
 app.get('/notes', async (req, res) => {
   try {
     const notes = await Note.find();
@@ -27,6 +51,4 @@ app.get('/notes', async (req, res) => {
   }
 });
 
-app.listen(3001, () => {
-  console.log('Server started on port 3001');
-});
+// Implement other CRUD routes (GET, PUT, DELETE)
